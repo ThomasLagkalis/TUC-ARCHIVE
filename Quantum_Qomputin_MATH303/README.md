@@ -20,4 +20,23 @@ git clone https://github.com/ThomasLagkalis/TUC-ARCHIVE.git ;cd TUC-ARCHIVE/Quan
 
 This command will download the whole repo, if you wish you can delete the other projects.
 
+Now run the nurse_scheduling_problem.py. You must specify two parameters: the first parameter is the number of nurses and the second is the number of days for the schedule i.g. 2 nurses and 3 days. (note in your case it might be *python* instead of *python3*). 
+
+```console 
+python3 nurse_scheduling_porblem.py 2 3
+```
+
+The default solver used is the classical one which uses brute force algorithm to minimize the objective functio. 
+If you want to use the hybrid (quantum-classical) solver you can specify it with the option: --hybrid
+
+```console 
+python3 nurse_scheduling_porblem.py 2 3 --hybrid
+```
+
+## Results 
+
+After you run the programm the results should look something like this:
+
+![Programm results!](/images/results1.png")
+
 

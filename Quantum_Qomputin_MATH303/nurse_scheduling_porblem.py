@@ -17,11 +17,18 @@ from dimod import BinaryQuadraticModel, ExactSolver
 from collections import defaultdict
 from dwave.system import LeapHybridSampler
 from copy import deepcopy
-import time
+import time, argparse
+
+parser = argparse.ArgumentParser(description='An expirimental algorithm for the Nurse Scheduling Problem. Implemented for D-Wave\'s QPU')
+parser.add_argument('nurses', metavar="N", type=int, help='The number of nurses')
+parser.add_argument('days', metavar="D", type=int, help='The number of days in the schedule')
+parser.add_argument("--hybrid", help="Run the algorithm on a hybrid solver (default is classical solver)",
+                    action="store_true")
+args = parser.parse_args()
 
 # Define basic problem parameters
-num_of_nurses = 10 
-num_of_days = 14    #Days in the schedule
+num_of_nurses = args.nurses 
+num_of_days = args.days    #Days in the schedule
 a = 1   #Parameter for hard nurse constraint 
 lamda = 1  #Weight parameter for hard shift constraint
 gamma = 1   #Weight parameter for shoft nurse constraint 
@@ -122,17 +129,25 @@ start = time.time()
 Q = build_BQM()
 bqm = BinaryQuadraticModel.from_qubo(Q)
 
-print("\nSending problem to hybrid sampler...")
-sampler = LeapHybridSampler()
-results = sampler.sample(bqm, label='Nurse Scheduling')
+# A fucntion to dediced which solver to use based on the user's input argument --hybrid.
+def use_sampler(hybrid):
+    if (hybrid):
+        print("\nSending problem to hybrid sampler...")
+        sampler = LeapHybridSampler()
+        results = sampler.sample(bqm, label='Nurse Scheduling')
+    else:
+        print("\nSolving problem in local CPU...")
+        sampler = ExactSolver()
+        results = sampler.sample(bqm)
+    return results
 
-#iprint("\nSolving problem in local CPU...")
-#sampler = ExactSolver()
-#results = sampler.sample(bqm)
+
+results = use_sampler(args.hybrid)
 end = time.time()
 print(f"\nEnergy of solution: {results.first.energy}")
 print(f"Number of occurrences of solution: {results.first.num_occurrences}")
 print(f"Time of execution: {end-start} seconds") 
+
 best_sample = results.first.sample 
 
 sched = [inverse_composite_index(j) for j in range(len(best_sample)) if j in best_sample and best_sample[j] == 1]
